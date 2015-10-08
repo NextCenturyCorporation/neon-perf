@@ -15,8 +15,9 @@ import Joda._
 
 class NeonMongoEarthquakes extends Simulation {
 
+    val serverUri = "http://ec2-54-174-201-125.compute-1.amazonaws.com:8080"
 	val httpProtocol = http
-		.baseURL("http://localhost:8080")
+		.baseURL(serverUri)
 		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.png""", """.*\.html""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.(t|o)tf"""), WhiteList())
 
 	val headers_0 = Map(
@@ -39,7 +40,9 @@ class NeonMongoEarthquakes extends Simulation {
 		"Pragma" -> "no-cache",
 		"X-Requested-With" -> "XMLHttpRequest")
 
-    val uri1 = "http://localhost:8080/neon"
+    val uri1 = serverUri + "/neon"
+
+    val databaseType = "elasticsearch"
 
     val countBody = StringBody("""
       {
@@ -66,7 +69,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val countRequest = http("count")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
 			.body(countBody)
 
@@ -116,7 +119,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val groupByNetRequest = http("groupByNet")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo?ignoredFilterIds=countby-test-earthquakes-1a33b7f7-4944-4232-a1f6-31eb283a395f")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=countby-test-earthquakes-1a33b7f7-4944-4232-a1f6-31eb283a395f")
 			.headers(headers_2)
 			.body(groupByNet)
 
@@ -166,7 +169,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val groupByNetBarRequest = http("groupByNetBar")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo?ignoredFilterIds=barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6")
 			.headers(headers_2)
 			.body(groupByNetBar)
 
@@ -234,7 +237,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val timeSeriesRequest = http("timeSeries")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
 			.body(timeSeries)
 
@@ -300,7 +303,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val timeSeriesExtendedRequest = http("timeSeriesExtended")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo?ignoredFilterIds=date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545")
 			.headers(headers_2)
 			.body(timeSeriesExtended)
 
@@ -331,7 +334,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val get500Request = http("get500")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
 			.body(get500)
 
@@ -357,7 +360,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val get5000Request = http("get5000")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
 			.body(get5000)
 
@@ -471,7 +474,7 @@ class NeonMongoEarthquakes extends Simulation {
       }
     """)
     val opsClockRequest = http("opsClock")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
 			.body(opsClock)
     val getFiltersRequest = http("getFilters")
@@ -636,11 +639,11 @@ class NeonMongoEarthquakes extends Simulation {
 	val scn = scenario("NeonMongoEarthquakes")
 		// Initial load
 		.exec(http("Load page")
-			.get("/neon/examples/neon-gtd/app/")
+			.get("/neon-gtd/app/")
 			.headers(headers_0))
 		.pause(4)
 		.exec(http("Get table and fields")
-			.get("/neon/services/queryservice/tablesandfields/localhost/mongo/test")
+			.get("/neon/services/queryservice/tablesandfields/localhost/" + databaseType + "/test")
 			.headers(headers_1)
 			.resources(http("Clear filters")
 			.post(uri1 + "/services/filterservice/clearfilters")
@@ -652,11 +655,11 @@ class NeonMongoEarthquakes extends Simulation {
 			.resources(Seq(timeSeriesExtendedRequest,
             get500Request,
             http("newestRecord")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo?ignoreFilters=true")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoreFilters=true")
 			.headers(headers_2)
 			.body(newestRecord),
             http("oldestRecord")
-			.post(uri1 + "/services/queryservice/query/localhost/mongo?ignoreFilters=true")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoreFilters=true")
 			.headers(headers_2)
 			.body(oldestRecord),
             countRequest,
