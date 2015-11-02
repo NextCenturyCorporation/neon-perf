@@ -10,9 +10,9 @@ import org.joda.time.{Period, DateTime}
 import Joda._
 
 
-class NeonMongoEarthquakes extends Simulation {
+class NeonSummerWorkshop2015 extends Simulation {
 
-    val serverUri = "http://ec2-54-174-201-125.compute-1.amazonaws.com:8080"
+    val serverUri = "http://ec2-52-91-37-132.compute-1.amazonaws.com:8080"
 	val httpProtocol = http
 		.baseURL(serverUri)
 		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.png""", """.*\.html""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.(t|o)tf"""), WhiteList())
@@ -41,283 +41,155 @@ class NeonMongoEarthquakes extends Simulation {
 
     val databaseType = "elasticsearch"
 
-    val countBody = StringBody("""
+    val taxiTimeSeries = StringBody("""
       {
-        "sortClauses": [],
-        "filter": {
-          "tableName": "earthquakes",
-          "databaseName": "test"
-        },
-        "fields": [
-          "*"
-        ],
-        "ignoreFilters_": false,
-        "selectionOnly_": false,
-        "ignoredFilterIds_": [],
-        "groupByClauses": [],
-        "isDistinct": false,
-        "aggregates": [
-          {
-            "name": "count",
-            "field": "*",
-            "operation": "count"
-          }
-        ]
-      }
-    """)
-    val countRequest = http("count")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
-			.headers(headers_2)
-			.body(countBody)
-
-    val groupByNet = StringBody("""
-      {
-        "limitClause": {
-          "limit": 16000
-        },
-        "sortClauses": [
-          {
-            "sortOrder": -1,
-            "fieldName": "count"
-          }
-        ],
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
         "filter": {
           "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "net",
-            "type": "where"
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "pickup_datetime", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "pickup_datetime", "type": "where" }
+            ],
+            "type": "and"
           },
-          "tableName": "earthquakes",
-          "databaseName": "test"
+          "tableName": "trip",
+          "databaseName": "nyouterboro"
         },
-        "fields": [
-          "*"
-        ],
-        "ignoreFilters_": false,
-        "selectionOnly_": false,
-        "ignoredFilterIds_": [
-          "countby-test-earthquakes-1a33b7f7-4944-4232-a1f6-31eb283a395f"
-        ],
-        "groupByClauses": [
-          {
-            "field": "net",
-            "type": "single"
-          }
-        ],
-        "isDistinct": false,
-        "aggregates": [
-          {
-            "name": "count",
-            "field": "*",
-            "operation": "count"
-          }
-        ]
-      }
-    """)
-    val groupByNetRequest = http("groupByNet")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=countby-test-earthquakes-1a33b7f7-4944-4232-a1f6-31eb283a395f")
-			.headers(headers_2)
-			.body(groupByNet)
-
-    val groupByNetBar = StringBody("""
-      {
-        "limitClause": {
-          "limit": 150
-        },
-        "sortClauses": [
-          {
-            "sortOrder": -1,
-            "fieldName": "Count"
-          }
-        ],
-        "filter": {
-          "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "net",
-            "type": "where"
-          },
-          "tableName": "earthquakes",
-          "databaseName": "test"
-        },
-        "fields": [
-          "*"
-        ],
-        "ignoreFilters_": false,
-        "selectionOnly_": false,
-        "ignoredFilterIds_": [
-          "barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6"
-        ],
-        "groupByClauses": [
-          {
-            "field": "net",
-            "type": "single"
-          }
-        ],
-        "isDistinct": false,
-        "aggregates": [
-          {
-            "name": "Count",
-            "field": "*",
-            "operation": "count"
-          }
-        ]
-      }
-    """)
-    val groupByNetBarRequest = http("groupByNetBar")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6")
-			.headers(headers_2)
-			.body(groupByNetBar)
-
-    val timeSeries = StringBody("""
-      {
-        "sortClauses": [
-          {
-            "sortOrder": 1,
-            "fieldName": "date"
-          }
-        ],
-        "filter": {
-          "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "time",
-            "type": "where"
-          },
-          "tableName": "earthquakes",
-          "databaseName": "test"
-        },
-        "fields": [
-          "*"
-        ],
+        "fields": [ "*" ],
         "ignoreFilters_": false,
         "selectionOnly_": false,
         "ignoredFilterIds_": [],
         "groupByClauses": [
-          {
-            "name": "year",
-            "field": "time",
-            "operation": "year",
-            "type": "function"
-          },
-          {
-            "name": "month",
-            "field": "time",
-            "operation": "month",
-            "type": "function"
-          },
-          {
-            "name": "day",
-            "field": "time",
-            "operation": "dayOfMonth",
-            "type": "function"
-          },
-          {
-            "field": "type",
-            "type": "single"
-          }
+          { "name": "year", "field": "pickup_datetime", "operation": "year", "type": "function" },
+          { "name": "month", "field": "pickup_datetime", "operation": "month", "type": "function" },
+          { "name": "day", "field": "pickup_datetime", "operation": "dayOfMonth", "type": "function" }
         ],
         "isDistinct": false,
         "aggregates": [
-          {
-            "name": "value",
-            "field": "*",
-            "operation": "count"
-          },
-          {
-            "name": "date",
-            "field": "time",
-            "operation": "min"
-          }
+          { "name": "value", "field": "*", "operation": "count" },
+          { "name": "date", "field": "pickup_datetime", "operation": "min" }
         ]
       }
     """)
-    val timeSeriesRequest = http("timeSeries")
+    val taxiTimeSeriesRequest = http("taxiTimeSeries")
 			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
-			.body(timeSeries)
+			.body(taxiTimeSeries)
 
-    val timeSeriesExtended = StringBody("""
+    val taxiTripLengthTimeSeries = StringBody("""
       {
-        "sortClauses": [
-          {
-            "sortOrder": 1,
-            "fieldName": "date"
-          }
-        ],
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
         "filter": {
           "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "time",
-            "type": "where"
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "pickup_datetime", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "pickup_datetime", "type": "where" }
+            ],
+            "type": "and"
           },
-          "tableName": "earthquakes",
-          "databaseName": "test"
+          "tableName": "trip",
+          "databaseName": "nyouterboro"
         },
-        "fields": [
-          "*"
-        ],
+        "fields": [ "*" ],
         "ignoreFilters_": false,
         "selectionOnly_": false,
-        "ignoredFilterIds_": [
-          "date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545"
-        ],
+        "ignoredFilterIds_": [],
         "groupByClauses": [
-          {
-            "name": "year",
-            "field": "time",
-            "operation": "year",
-            "type": "function"
-          },
-          {
-            "name": "month",
-            "field": "time",
-            "operation": "month",
-            "type": "function"
-          },
-          {
-            "name": "day",
-            "field": "time",
-            "operation": "dayOfMonth",
-            "type": "function"
-          }
+          { "name": "year", "field": "pickup_datetime", "operation": "year", "type": "function" },
+          { "name": "month", "field": "pickup_datetime", "operation": "month", "type": "function" },
+          { "name": "day", "field": "pickup_datetime", "operation": "dayOfMonth", "type": "function" }
         ],
         "isDistinct": false,
         "aggregates": [
-          {
-            "name": "count",
-            "field": "*",
-            "operation": "count"
-          },
-          {
-            "name": "date",
-            "field": "time",
-            "operation": "min"
-          }
+          {"operation": "avg", "field": "trip_time_in_seconds", "name": "value"},
+          { "name": "date", "field": "pickup_datetime", "operation": "min" }
         ]
       }
     """)
-    val timeSeriesExtendedRequest = http("timeSeriesExtended")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoredFilterIds=date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545")
+    val taxiTripLengthTimeSeriesRequest = http("taxiTripLengthTimeSeries")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
-			.body(timeSeriesExtended)
+			.body(taxiTripLengthTimeSeries)
+
+    val taxiSpeedTimeSeries = StringBody("""
+      {
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
+        "filter": {
+          "whereClause": {
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "pickup_datetime", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "pickup_datetime", "type": "where" }
+            ],
+            "type": "and"
+          },
+          "tableName": "trip",
+          "databaseName": "nyouterboro"
+        },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [],
+        "groupByClauses": [
+          { "name": "year", "field": "pickup_datetime", "operation": "year", "type": "function" },
+          { "name": "month", "field": "pickup_datetime", "operation": "month", "type": "function" },
+          { "name": "day", "field": "pickup_datetime", "operation": "dayOfMonth", "type": "function" }
+        ],
+        "isDistinct": false,
+        "aggregates": [
+          {"operation": "avg", "field": "calculated_speed_mph", "name": "value"},
+          { "name": "date", "field": "pickup_datetime", "operation": "min" }
+        ]
+      }
+    """)
+    val taxiSpeedTimeSeriesRequest = http("taxiSpeedTimeSeries")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+			.headers(headers_2)
+			.body(taxiSpeedTimeSeries)
+
+    val tweetTimeSeriesExtended = StringBody("""
+      {
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
+        "filter": {
+          "whereClause": {
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "created_at", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "created_at", "type": "where" }
+            ],
+            "type": "and"
+          },
+          "tableName": "tweet",
+          "databaseName": "nyctwitter"
+        },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [ "date-nyctwitter-tweet-0d901d1e-f620-416e-9bb3-4ea275d1329b" ],
+        "groupByClauses": [
+          { "name": "year", "field": "created_at", "operation": "year", "type": "function" },
+          { "name": "month", "field": "created_at", "operation": "month", "type": "function" },
+          { "name": "day", "field": "created_at", "operation": "dayOfMonth", "type": "function" }
+        ],
+        "isDistinct": false,
+        "aggregates": [
+          { "name": "count", "field": "*", "operation": "count" },
+          { "name": "date", "field": "created_at", "operation": "min" }
+        ]
+      }
+    """)
+    val tweetTimeSeriesExtendedRequest = http("tweetTimeSeriesExtended")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "/?ignoredFilterIds=date-nyctwitter-tweet-772326c4-995b-44f2-aa08-6e9801288b36")
+			.headers(headers_2)
+			.body(tweetTimeSeriesExtended)
 
     val get500 = StringBody("""
       {
         "limitClause": {
           "limit": 500
         },
-        "sortClauses": [
-          {
-            "sortOrder": 1,
-            "fieldName": "time"
-          }
-        ],
+        "sortClauses": [ ],
         "filter": {
-          "tableName": "earthquakes",
-          "databaseName": "test"
+          "tableName": "tweet",
+          "databaseName": "nyctwitter"
         },
         "fields": [
           "*"
@@ -335,145 +207,186 @@ class NeonMongoEarthquakes extends Simulation {
 			.headers(headers_2)
 			.body(get500)
 
-    val get5000 = StringBody("""
+    val temperature = StringBody("""
       {
-        "limitClause": {
-          "limit": 5000
-        },
-        "sortClauses": [],
+        "aggregates": [
+          {"operation": "avg", "field": "Mean TemperatureF", "name": "value"},
+          {"operation": "min", "field": "Date", "name": "date"}
+        ],
+        "fields": ["*"],
         "filter": {
-          "tableName": "earthquakes",
-          "databaseName": "test"
+          "databaseName": "nycweather",
+          "tableName": "day",
+          "whereClause": {
+            "type": "and",
+            "whereClauses": [
+              {"type": "where", "lhs": "Date", "operator": ">=", "rhs": "1970-01-01T00:00:00.000Z"},
+              {"type": "where", "lhs": "Date", "operator": "<=", "rhs": "2025-01-01T00:00:00.000Z"}
+            ]
+          }
         },
-        "fields": [
-          "*"
+        "groupByClauses": [
+          {"type": "function", "operation": "year", "field": "Date", "name": "year"},
+          {"type": "function", "operation": "month", "field": "Date", "name": "month"},
+          {"type": "function", "operation": "dayOfMonth", "field": "Date", "name": "day"}
         ],
         "ignoreFilters_": false,
-        "selectionOnly_": false,
         "ignoredFilterIds_": [],
-        "groupByClauses": [],
         "isDistinct": false,
-        "aggregates": []
+        "selectionOnly_": false,
+        "sortClauses": [{"fieldName": "date", "sortOrder": 1}]
       }
     """)
-    val get5000Request = http("get5000")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
-			.headers(headers_2)
-			.body(get5000)
+    val temperatureRequest = http("temperature")
+            .post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+            .headers(headers_2)
+            .body(temperature)
 
-    val newestRecord = StringBody("""
+    val windSpeed = StringBody("""
       {
-        "limitClause": {
-          "limit": 1
-        },
-        "sortClauses": [
-          {
-            "sortOrder": -1,
-            "fieldName": "time"
-          }
-        ],
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
         "filter": {
           "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "time",
-            "type": "where"
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "Date", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "Date", "type": "where" }
+            ],
+            "type": "and"
           },
-          "tableName": "earthquakes",
-          "databaseName": "test"
+          "tableName": "day",
+          "databaseName": "nycweather"
         },
-        "fields": [
-          "*"
-        ],
-        "ignoreFilters_": true,
-        "selectionOnly_": false,
-        "ignoredFilterIds_": [],
-        "groupByClauses": [],
-        "isDistinct": false,
-        "aggregates": []
-      }
-    """)
-
-    val oldestRecord = StringBody("""
-      {
-        "limitClause": {
-          "limit": 1
-        },
-        "sortClauses": [
-          {
-            "sortOrder": 1,
-            "fieldName": "time"
-          }
-        ],
-        "filter": {
-          "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "time",
-            "type": "where"
-          },
-          "tableName": "earthquakes",
-          "databaseName": "test"
-        },
-        "fields": [
-          "*"
-        ],
-        "ignoreFilters_": true,
-        "selectionOnly_": false,
-        "ignoredFilterIds_": [],
-        "groupByClauses": [],
-        "isDistinct": false,
-        "aggregates": []
-      }
-    """)
-
-    val opsClock = StringBody("""
-      {
-        "sortClauses": [],
-        "filter": {
-          "whereClause": {
-            "rhs": null,
-            "operator": "!=",
-            "lhs": "time",
-            "type": "where"
-          },
-          "tableName": "earthquakes",
-          "databaseName": "test"
-        },
-        "fields": [
-          "*"
-        ],
+        "fields": [ "*" ],
         "ignoreFilters_": false,
         "selectionOnly_": false,
         "ignoredFilterIds_": [],
         "groupByClauses": [
-          {
-            "name": "day",
-            "field": "time",
-            "operation": "dayOfWeek",
-            "type": "function"
-          },
-          {
-            "name": "hour",
-            "field": "time",
-            "operation": "hour",
-            "type": "function"
-          }
+          { "name": "year", "field": "Date", "operation": "year", "type": "function" },
+          { "name": "month", "field": "Date", "operation": "month", "type": "function" },
+          { "name": "day", "field": "Date", "operation": "dayOfMonth", "type": "function" }
         ],
         "isDistinct": false,
         "aggregates": [
-          {
-            "name": "count",
-            "field": "*",
-            "operation": "count"
-          }
+          { "name": "value", "field": "Mean Wind SpeedMPH", "operation": "avg" },
+          { "name": "date", "field": "Date", "operation": "min" }
         ]
       }
     """)
-    val opsClockRequest = http("opsClock")
+    val windSpeedRequest = http("windSpeed")
 			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
 			.headers(headers_2)
-			.body(opsClock)
+			.body(windSpeed)
+
+    val cloudCover = StringBody("""
+      {
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
+        "filter": {
+          "whereClause": {
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "Date", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "Date", "type": "where" }
+            ],
+            "type": "and"
+          },
+          "tableName": "day",
+          "databaseName": "nycweather"
+        },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [],
+        "groupByClauses": [
+          { "name": "year", "field": "Date", "operation": "year", "type": "function" },
+          { "name": "month", "field": "Date", "operation": "month", "type": "function" },
+          { "name": "day", "field": "Date", "operation": "dayOfMonth", "type": "function" }
+        ],
+        "isDistinct": false,
+        "aggregates": [
+          { "name": "value", "field": "CloudCover", "operation": "avg" },
+          { "name": "date", "field": "Date", "operation": "min" }
+        ]
+      }
+    """)
+    val cloudCoverRequest = http("cloudCover")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+			.headers(headers_2)
+			.body(cloudCover)
+
+    val precipitation = StringBody("""
+      {
+        "sortClauses": [ { "sortOrder": 1, "fieldName": "date" } ],
+        "filter": {
+          "whereClause": {
+            "whereClauses": [
+              { "rhs": "1970-01-01T00:00:00.000Z", "operator": ">=", "lhs": "Date", "type": "where" },
+              { "rhs": "2025-01-01T00:00:00.000Z", "operator": "<=", "lhs": "Date", "type": "where" }
+            ],
+            "type": "and"
+          },
+          "tableName": "day",
+          "databaseName": "nycweather"
+        },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [],
+        "groupByClauses": [
+          { "name": "year", "field": "Date", "operation": "year", "type": "function" },
+          { "name": "month", "field": "Date", "operation": "month", "type": "function" },
+          { "name": "day", "field": "Date", "operation": "dayOfMonth", "type": "function" }
+        ],
+        "isDistinct": false,
+        "aggregates": [
+          { "name": "value", "field": "PrecipitationIn", "operation": "avg" },
+          { "name": "date", "field": "Date", "operation": "min" }
+        ]
+      }
+    """)
+    val precipitationRequest = http("precipitation")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+			.headers(headers_2)
+			.body(precipitation)
+
+    val getTwitter5000 = StringBody("""
+      {
+        "limitClause": { "limit": 5000 },
+        "sortClauses": [],
+        "filter": { "tableName": "tweet", "databaseName": "nyctwitter" },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [],
+        "groupByClauses": [],
+        "isDistinct": false,
+        "aggregates": []
+      }
+    """)
+    val getTwitter5000Request = http("getTwitter5000")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+			.headers(headers_2)
+			.body(getTwitter5000)
+
+    val getTaxi10000 = StringBody("""
+      {
+        "limitClause": { "limit": 5000 },
+        "sortClauses": [],
+        "filter": { "tableName": "trip", "databaseName": "nyouterboro" },
+        "fields": [ "*" ],
+        "ignoreFilters_": false,
+        "selectionOnly_": false,
+        "ignoredFilterIds_": [],
+        "groupByClauses": [],
+        "isDistinct": false,
+        "aggregates": []
+      }
+    """)
+    val getTaxi10000Request = http("getTaxi10000")
+			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType)
+			.headers(headers_2)
+			.body(getTaxi10000)
+
+    val tagsRequest = http("tags")
+            .get(uri1 + "/services/queryservice/arraycounts/localhost/" + databaseType + "/nyctwitter/tweet?field=lowertags&limit=40")
     val getFiltersRequest = http("getFilters")
 			.get(uri1 + "/services/filterservice/filters/*/*")
 			.headers(headers_1)
@@ -620,18 +533,22 @@ class NeonMongoEarthquakes extends Simulation {
 
     val updateResources = Seq(
       getFiltersRequest,
-      timeSeriesExtendedRequest,
-      timeSeriesRequest,
-      get5000Request,
+      taxiTimeSeriesRequest,
+      taxiTripLengthTimeSeriesRequest,
+      taxiSpeedTimeSeriesRequest,
+      tweetTimeSeriesExtendedRequest,
+      temperatureRequest,
+      windSpeedRequest,
+      cloudCoverRequest,
+      precipitationRequest,
+      getTwitter5000Request,
+      getTaxi10000Request,
       get500Request,
-      groupByNetBarRequest,
-      groupByNetRequest,
-      opsClockRequest,
-      countRequest
+      tagsRequest
     )
 
-    val updateResourcesWithoutTime = updateResources.filterNot(e => ((e eq timeSeriesExtendedRequest) || (e eq timeSeriesRequest)))
-    val updateResourcesWithoutBarChart = updateResources.filterNot(e => e eq groupByNetBarRequest)
+    val updateResourcesWithoutTime = updateResources.filterNot(e => (e eq tweetTimeSeriesExtendedRequest))
+    //val updateResourcesWithoutBarChart = updateResources.filterNot(e => e eq groupByNetBarRequest)
 
 	val scn = scenario("NeonMongoEarthquakes")
 		// Initial load
@@ -649,22 +566,8 @@ class NeonMongoEarthquakes extends Simulation {
 		.exec(http("Get filter builder id")
 			.get("/neon/services/widgetservice/instanceid?qualifier=filterBuilder")
 			.headers(headers_3)
-			.resources(Seq(timeSeriesExtendedRequest,
-            get500Request,
-            http("newestRecord")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoreFilters=true")
-			.headers(headers_2)
-			.body(newestRecord),
-            http("oldestRecord")
-			.post(uri1 + "/services/queryservice/query/localhost/" + databaseType + "?ignoreFilters=true")
-			.headers(headers_2)
-			.body(oldestRecord),
-            countRequest,
-            opsClockRequest,
-            groupByNetBarRequest,
-            groupByNetRequest,
-            timeSeriesRequest,
-            get5000Request):_*))
+			.resources(updateResources:_*))
+        /*
         .repeat(10) {
           pause(9, 15)
           // Time Filter
@@ -752,6 +655,7 @@ class NeonMongoEarthquakes extends Simulation {
               .body(StringBody("map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"))
               .resources(updateResources:_*))
         }
+        */
 
 	//setUp(scn.inject(rampUsers(32) over (1 minutes))).protocols(httpProtocol)
 	setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)

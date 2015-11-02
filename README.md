@@ -7,11 +7,12 @@ These tests are based on how the Neon GTD interacts with the server.
 Performance tests are executed via [gatling maven plugin](https://github.com/excilys/gatling/wiki/Maven-plugin).
 Running performance tests is as simple as following:
 
-```mvn clean test```
+```mvn clean test -Dgatling.simulationClass=NeonSummerWorkshop2015```
 
-You can pass custom cluster url via system property:
+The simulation class can be NeonSummerWorkshop2015 or NeonMongoEarthquakes. You can pass custom cluster
+url via system property:
 
-```mvn clean test -Dcluster.url=https://myserver.gooddata.com```
+```mvn clean test -Dgatling.simulationClass=NeonSummercamp2015 -Dcluster.url=https://myserver.gooddata.com```
 
 ### Jenkins
 There is a [jenkins job](https://ci.intgdc.com/job/MSF-Performance-Tests/) for automatic execution.
