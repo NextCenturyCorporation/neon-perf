@@ -418,8 +418,8 @@ class NeonSummerWorkshop2015 extends Simulation {
         "id": "date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545"
       }
     """)
-    val startDate = DateTime.parse("2014-05-12T00:00:00.000Z")
-    val endDate = DateTime.parse("2014-06-12T00:00:00.000Z")
+    val startDate = DateTime.parse("2014-01-01T00:00:00.000Z")
+    val endDate = DateTime.parse("2014-12-31T00:00:00.000Z")
     val daily = new Period(0,0,0,1,0,0,0,0)
     def dateRange(from: DateTime, to: DateTime, step: Period): Iterator[DateTime]=Iterator.iterate(from)(_.plus(step)).takeWhile(!_.isAfter(to))
 
@@ -487,16 +487,27 @@ class NeonSummerWorkshop2015 extends Simulation {
         "id": "map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"
       }
     """)
-    val northMin = 47
-    val southMax = 30
-    val westMax = -125
-    val eastMin = -66
-    val mapFeeder = Iterator.continually(Map(
-      "northLatitude" -> (Random.nextDouble() * (90-northMin) + northMin),
-      "southLatitude" -> (Random.nextDouble() * (-90-southMax) + southMax),
-      "westLongitude" -> (Random.nextDouble() * (-180-westMax) + westMax),
-      "eastLongitude" -> (Random.nextDouble() * (180-eastMin) + eastMin)
-    ))
+    val latitudeMin = -74.0370788
+    val latitudeMax = -73.7033691
+    val longitudeMin = 40.5611638
+    val longitudeMax = 40.9139096
+
+    def twoDoublesInRange(from: Double, to: Double): Seq[Double] = {
+      var doubles = for (i <- 0 to 1) yield from + (to - from) * Random.nextDouble
+      return doubles.sorted
+    }
+
+    val mapFeeder = Iterator.continually({
+      val latitudes = twoDoublesInRange(latitudeMin, latitudeMax)
+      var longitudes = twoDoublesInRange(longitudeMin, longitudeMax)
+
+      Map(
+        "northLatitude" -> longitudes.tail.head,
+        "southLatitude" -> longitudes.head,
+        "westLongitude" -> longitudes.head,
+        "eastLongitude" -> longitudes.tail.head
+      )
+    })
 
     val barChartFilter = StringBody("""
       {
@@ -567,7 +578,6 @@ class NeonSummerWorkshop2015 extends Simulation {
 			.get("/neon/services/widgetservice/instanceid?qualifier=filterBuilder")
 			.headers(headers_3)
 			.resources(updateResources:_*))
-        /*
         .repeat(10) {
           pause(9, 15)
           // Time Filter
@@ -599,6 +609,7 @@ class NeonSummerWorkshop2015 extends Simulation {
               .headers(headers_22)
               .body(StringBody("map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"))
               .resources(updateResources:_*))
+          /*
           .pause(12, 18)
           // Network Filter
           .feed(barChartFeeder)
@@ -614,6 +625,7 @@ class NeonSummerWorkshop2015 extends Simulation {
               .headers(headers_22)
               .body(StringBody("barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6"))
               .resources(updateResourcesWithoutBarChart:_*))
+          */
           .pause(15, 23)
           // Second Map Filter
           .feed(mapFeeder)
@@ -632,6 +644,7 @@ class NeonSummerWorkshop2015 extends Simulation {
               .resources(updateResourcesWithoutTime:_*))
           .pause(8, 12)
           .feed(barChartFeeder)
+          /*
           // Map Time and Network Filter
           .exec(http("request_106")
               .post("/neon/services/filterservice/addfilter")
@@ -644,6 +657,7 @@ class NeonSummerWorkshop2015 extends Simulation {
               .headers(headers_22)
               .body(StringBody("barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6"))
               .resources(updateResourcesWithoutBarChart:_*))
+          */
           .exec(http("request_22")
               .post("/neon/services/filterservice/removefilter")
               .headers(headers_22)
@@ -655,7 +669,6 @@ class NeonSummerWorkshop2015 extends Simulation {
               .body(StringBody("map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"))
               .resources(updateResources:_*))
         }
-        */
 
 	//setUp(scn.inject(rampUsers(32) over (1 minutes))).protocols(httpProtocol)
 	setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)
