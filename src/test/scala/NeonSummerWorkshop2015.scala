@@ -12,7 +12,10 @@ import Joda._
 
 class NeonSummerWorkshop2015 extends Simulation {
 
-    val serverUri = "http://ec2-52-91-37-132.compute-1.amazonaws.com:8080"
+    val serverUri = System.getProperty("neon.server")
+    if (serverUri == null) {
+      throw new IllegalArgumentException("The system property 'neon.server' must be specified (e.g., by -DneonServer=http://example.com:8080)")
+    }
 	val httpProtocol = http
 		.baseURL(serverUri)
 		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.png""", """.*\.html""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.(t|o)tf"""), WhiteList())
@@ -561,7 +564,7 @@ class NeonSummerWorkshop2015 extends Simulation {
     val updateResourcesWithoutTime = updateResources.filterNot(e => (e eq tweetTimeSeriesExtendedRequest))
     //val updateResourcesWithoutBarChart = updateResources.filterNot(e => e eq groupByNetBarRequest)
 
-	val scn = scenario("NeonMongoEarthquakes")
+	val scn = scenario("NeonSummerWorkshop2015")
 		// Initial load
 		.exec(http("Load page")
 			.get("/neon-gtd/app/")
@@ -670,6 +673,12 @@ class NeonSummerWorkshop2015 extends Simulation {
               .resources(updateResources:_*))
         }
 
-	//setUp(scn.inject(rampUsers(32) over (1 minutes))).protocols(httpProtocol)
-	setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)
+    def getNumUsers(): Int = {
+      try {
+        return System.getProperty("neon.users").toInt
+      } catch {
+        case e: Exception => return 1
+      }
+    }
+    setUp(scn.inject(rampUsers(getNumUsers()) over (1 minutes))).protocols(httpProtocol)
 }

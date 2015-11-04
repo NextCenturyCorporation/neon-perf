@@ -7,7 +7,7 @@ These tests are based on how the Neon GTD interacts with the server.
 Performance tests are executed via [gatling maven plugin](https://github.com/excilys/gatling/wiki/Maven-plugin).
 Running performance tests is as simple as following:
 
-```mvn clean test -Dgatling.simulationClass=NeonSummerWorkshop2015```
+```mvn clean test -Dgatling.simulationClass=NeonSummerWorkshop2015``` -Dneon.server=http://example.com:8080 -Dneon.users=16
 
 The simulation class can be NeonSummerWorkshop2015 or NeonMongoEarthquakes. You can pass custom cluster
 url via system property:
