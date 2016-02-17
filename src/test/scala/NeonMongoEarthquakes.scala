@@ -12,17 +12,10 @@ import Joda._
 
 class NeonMongoEarthquakes extends Simulation {
 
-    val serverUri = System.getProperty("neon.server")
-    if (serverUri == null) {
-      // Assume we're running against the local Jetty
-      serverUri = "http://localhost:9999"
-    }
+    // If these settings aren't provided, assume we're running against the local Jetty
+    val serverUri = System.getProperty("neon.server", "http://localhost:9999")
+    val neonPrefix = System.getProperty("neon.prefix", "")
 
-    val neonPrefix = System.getProperty("neon.prefix")
-    if (neonPrefix == null) {
-      // Assume we're running against the local Jetty
-      neonPrefix = ""
-    }
 	val httpProtocol = http
 		.baseURL(serverUri)
 		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.png""", """.*\.html""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.(t|o)tf"""), WhiteList())
