@@ -29,6 +29,35 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.10.v20150310</version>
+                <configuration>
+                    <war>${project.basedir}/neon-1.2.0-SNAPSHOT.war</war>
+                    <httpConnector>
+                        <port>9999</port>
+                    </httpConnector>
+                    <stopPort>9998</stopPort>
+                    <stopKey>halt</stopKey>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-jetty</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>deploy-war</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-jetty</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>io.gatling</groupId>
                 <artifactId>gatling-maven-plugin</artifactId>
                 <version>${gatling.version}</version>
