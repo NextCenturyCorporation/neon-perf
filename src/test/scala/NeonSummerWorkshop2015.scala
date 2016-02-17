@@ -14,7 +14,7 @@ class NeonSummerWorkshop2015 extends Simulation {
 
     val serverUri = System.getProperty("neon.server")
     if (serverUri == null) {
-      throw new IllegalArgumentException("The system property 'neon.server' must be specified (e.g., by -DneonServer=http://example.com:8080)")
+      throw new IllegalArgumentException("The system property 'neon.server' must be specified (e.g., by -Dneon.server=http://example.com:8080)")
     }
 	val httpProtocol = http
 		.baseURL(serverUri)

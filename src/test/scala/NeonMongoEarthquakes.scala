@@ -12,7 +12,17 @@ import Joda._
 
 class NeonMongoEarthquakes extends Simulation {
 
-    val serverUri = "http://ec2-54-174-201-125.compute-1.amazonaws.com:8080"
+    val serverUri = System.getProperty("neon.server")
+    if (serverUri == null) {
+      // Assume we're running against the local Jetty
+      serverUri = "http://localhost:9999"
+    }
+
+    val neonPrefix = System.getProperty("neon.prefix")
+    if (neonPrefix == null) {
+      // Assume we're running against the local Jetty
+      neonPrefix = ""
+    }
 	val httpProtocol = http
 		.baseURL(serverUri)
 		.inferHtmlResources(BlackList(""".*\.js""", """.*\.css""", """.*\.png""", """.*\.html""", """.*\.gif""", """.*\.jpeg""", """.*\.jpg""", """.*\.ico""", """.*\.woff""", """.*\.(t|o)tf"""), WhiteList())
@@ -37,9 +47,9 @@ class NeonMongoEarthquakes extends Simulation {
 		"Pragma" -> "no-cache",
 		"X-Requested-With" -> "XMLHttpRequest")
 
-    val uri1 = serverUri + "/neon"
+    val uri1 = serverUri + neonPrefix
 
-    val databaseType = "elasticsearch"
+    val databaseType = "mongo"
 
     val countBody = StringBody("""
       {
@@ -621,11 +631,11 @@ class NeonMongoEarthquakes extends Simulation {
     val updateResources = Seq(
       getFiltersRequest,
       timeSeriesExtendedRequest,
-      timeSeriesRequest,
+      //timeSeriesRequest,
       get5000Request,
       get500Request,
-      groupByNetBarRequest,
-      groupByNetRequest,
+      //groupByNetBarRequest,
+      //groupByNetRequest,
       opsClockRequest,
       countRequest
     )
@@ -634,20 +644,15 @@ class NeonMongoEarthquakes extends Simulation {
     val updateResourcesWithoutBarChart = updateResources.filterNot(e => e eq groupByNetBarRequest)
 
 	val scn = scenario("NeonMongoEarthquakes")
-		// Initial load
-		.exec(http("Load page")
-			.get("/neon-gtd/app/")
-			.headers(headers_0))
-		.pause(3, 5)
 		.exec(http("Get table and fields")
-			.get("/neon/services/queryservice/tablesandfields/localhost/" + databaseType + "/test")
+			.get(neonPrefix + "/services/queryservice/tablesandfields/localhost/" + databaseType + "/test")
 			.headers(headers_1)
 			.resources(http("Clear filters")
 			.post(uri1 + "/services/filterservice/clearfilters")
 			.headers(headers_2)))
 		.pause(1)
 		.exec(http("Get filter builder id")
-			.get("/neon/services/widgetservice/instanceid?qualifier=filterBuilder")
+			.get(neonPrefix + "/services/widgetservice/instanceid?qualifier=filterBuilder")
 			.headers(headers_3)
 			.resources(Seq(timeSeriesExtendedRequest,
             get500Request,
@@ -661,23 +666,23 @@ class NeonMongoEarthquakes extends Simulation {
 			.body(oldestRecord),
             countRequest,
             opsClockRequest,
-            groupByNetBarRequest,
-            groupByNetRequest,
-            timeSeriesRequest,
+            //groupByNetBarRequest,
+            //groupByNetRequest,
+            //timeSeriesRequest,
             get5000Request):_*))
         .repeat(10) {
           pause(9, 15)
           // Time Filter
           .feed(timeFeeder)
           .exec(http("timeFilter")
-              .post("/neon/services/filterservice/replacefilter")
+              .post(neonPrefix + "/services/filterservice/replacefilter")
               .headers(headers_2)
               .body(timeFilter)
               .resources(updateResourcesWithoutTime:_*))
           .pause(8, 12)
           // Remove Time Filter
           .exec(http("request_22")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545"))
               .resources(updateResourcesWithoutTime:_*))
@@ -685,14 +690,14 @@ class NeonMongoEarthquakes extends Simulation {
           // Map Filter
           .feed(mapFeeder)
           .exec(http("request_30")
-              .post("/neon/services/filterservice/replacefilter")
+              .post(neonPrefix + "/services/filterservice/replacefilter")
               .headers(headers_2)
               .body(mapFilter)
               .resources(updateResources:_*))
           .pause(7, 9)
           // Remove Map FIlter
           .exec(http("request_48")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"))
               .resources(updateResources:_*))
@@ -700,14 +705,14 @@ class NeonMongoEarthquakes extends Simulation {
           // Network Filter
           .feed(barChartFeeder)
           .exec(http("request_62")
-              .post("/neon/services/filterservice/addfilter")
+              .post(neonPrefix + "/services/filterservice/addfilter")
               .headers(headers_2)
               .body(barChartFilter)
               .resources(updateResourcesWithoutBarChart:_*))
           .pause(6, 8)
           // Remove Network Filter
           .exec(http("request_71")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6"))
               .resources(updateResourcesWithoutBarChart:_*))
@@ -715,7 +720,7 @@ class NeonMongoEarthquakes extends Simulation {
           // Second Map Filter
           .feed(mapFeeder)
           .exec(http("request_80")
-              .post("/neon/services/filterservice/replacefilter")
+              .post(neonPrefix + "/services/filterservice/replacefilter")
               .headers(headers_2)
               .body(mapFilter)
               .resources(updateResources:_*))
@@ -723,7 +728,7 @@ class NeonMongoEarthquakes extends Simulation {
           // Map and Time Filter
           .feed(timeFeeder)
           .exec(http("request_98")
-              .post("/neon/services/filterservice/replacefilter")
+              .post(neonPrefix + "/services/filterservice/replacefilter")
               .headers(headers_2)
               .body(timeFilter)
               .resources(updateResourcesWithoutTime:_*))
@@ -731,23 +736,23 @@ class NeonMongoEarthquakes extends Simulation {
           .feed(barChartFeeder)
           // Map Time and Network Filter
           .exec(http("request_106")
-              .post("/neon/services/filterservice/addfilter")
+              .post(neonPrefix + "/services/filterservice/addfilter")
               .headers(headers_2)
               .body(barChartFilter)
               .resources(updateResourcesWithoutBarChart:_*))
           // Remove Filters
           .exec(http("request_71")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("barchart-test-earthquakes-2b74b1f7-15a1-4124-80bd-46f99eb484c6"))
               .resources(updateResourcesWithoutBarChart:_*))
           .exec(http("request_22")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("date-test-earthquakes-46d60c31-3f27-40c7-80cf-61a581af5545"))
               .resources(updateResourcesWithoutTime:_*))
           .exec(http("request_48")
-              .post("/neon/services/filterservice/removefilter")
+              .post(neonPrefix + "/services/filterservice/removefilter")
               .headers(headers_22)
               .body(StringBody("map-test-earthquakes-945f3210-882a-4014-83e9-08b5e34b3fe9"))
               .resources(updateResources:_*))
