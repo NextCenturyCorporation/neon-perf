@@ -33,6 +33,12 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.10.v20150310</version>
                 <configuration>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>logback.configurationFile</name>
+                            <value>./logback.xml</value>
+                        </systemProperty>
+                    </systemProperties>
                     <war>${project.basedir}/neon-1.2.0-SNAPSHOT.war</war>
                     <httpConnector>
                         <port>9999</port>
