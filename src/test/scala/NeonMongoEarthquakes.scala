@@ -77,7 +77,7 @@ class NeonMongoEarthquakes extends Simulation {
     val groupByNet = StringBody("""
       {
         "limitClause": {
-          "limit": 16000
+          "limit": 5000
         },
         "sortClauses": [
           {
@@ -106,6 +106,7 @@ class NeonMongoEarthquakes extends Simulation {
         "groupByClauses": [
           {
             "field": "net",
+            "prettyField": "net",
             "type": "single"
           }
         ],
@@ -156,6 +157,7 @@ class NeonMongoEarthquakes extends Simulation {
         "groupByClauses": [
           {
             "field": "net",
+            "prettyField": "net",
             "type": "single"
           }
         ],
@@ -628,8 +630,8 @@ class NeonMongoEarthquakes extends Simulation {
       //timeSeriesRequest,
       get5000Request,
       get500Request,
-      //groupByNetBarRequest,
-      //groupByNetRequest,
+      groupByNetBarRequest,
+      groupByNetRequest,
       opsClockRequest,
       countRequest
     )
@@ -660,8 +662,8 @@ class NeonMongoEarthquakes extends Simulation {
 			.body(oldestRecord),
             countRequest,
             opsClockRequest,
-            //groupByNetBarRequest,
-            //groupByNetRequest,
+            groupByNetBarRequest,
+            groupByNetRequest,
             //timeSeriesRequest,
             get5000Request):_*))
         .repeat(10) {
