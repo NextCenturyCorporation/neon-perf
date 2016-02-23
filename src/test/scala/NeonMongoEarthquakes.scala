@@ -218,10 +218,6 @@ class NeonMongoEarthquakes extends Simulation {
             "field": "time",
             "operation": "dayOfMonth",
             "type": "function"
-          },
-          {
-            "field": "type",
-            "type": "single"
           }
         ],
         "isDistinct": false,
@@ -627,7 +623,7 @@ class NeonMongoEarthquakes extends Simulation {
     val updateResources = Seq(
       getFiltersRequest,
       timeSeriesExtendedRequest,
-      //timeSeriesRequest,
+      timeSeriesRequest,
       get5000Request,
       get500Request,
       groupByNetBarRequest,
@@ -664,7 +660,7 @@ class NeonMongoEarthquakes extends Simulation {
             opsClockRequest,
             groupByNetBarRequest,
             groupByNetRequest,
-            //timeSeriesRequest,
+            timeSeriesRequest,
             get5000Request):_*))
         .repeat(10) {
           pause(9, 15)
